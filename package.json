@@ -1,0 +1,20 @@
+{
+  "name": "cms-api",
+  "version": "1.0.0",
+  "description": "Portfolio CMS API Server",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js"
+  },
+  "repository": "https://github.com/shinsungjin95/cms-api.git",
+  "author": "shinsungjin95 <zxjm1919@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.111.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
