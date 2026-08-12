@@ -5,6 +5,7 @@ import {
     createContent,
     findContentDetail,
     deleteContents,
+    updateContent,
 } from "../services/content.js";
 
 export const getContents = async (req, res) => {
@@ -13,6 +14,9 @@ export const getContents = async (req, res) => {
             menuId,
             offset = "0",
             limit = "10",
+            title,
+            startDate,
+            endDate,
         } = req.query;
 
         if (!menuId) {
@@ -26,6 +30,9 @@ export const getContents = async (req, res) => {
             menuId,
             offset: Number(offset),
             limit: Number(limit),
+            title,
+            startDate,
+            endDate,
         });
 
         return res.status(200).json({
@@ -134,6 +141,81 @@ export const removeContents = async (req, res) => {
         }
 
         const data = await deleteContents(ids);
+
+        return res.status(200).json({
+            success: true,
+            data,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+export const patchContentDetail = async (req, res) => {
+    try {
+        const {
+            detailId,
+            menuId,
+            title,
+            content = "",
+            existingImages = "[]",
+        } = req.body;
+
+        if (!detailId) {
+            return res.status(400).json({
+                success: false,
+                message: "detailId가 필요합니다.",
+            });
+        }
+
+        if (!menuId) {
+            return res.status(400).json({
+                success: false,
+                message: "menuId가 필요합니다.",
+            });
+        }
+
+        if (!title) {
+            return res.status(400).json({
+                success: false,
+                message: "title이 필요합니다.",
+            });
+        }
+
+        // 프론트 FormData에서 JSON.stringify해서 보내기 때문에 파싱
+        let currentImages = [];
+
+        try {
+            currentImages = JSON.parse(existingImages);
+        } catch {
+            return res.status(400).json({
+                success: false,
+                message: "existingImages 형식이 올바르지 않습니다.",
+            });
+        }
+
+        // 새로 추가한 이미지가 있으면 Storage 업로드
+        const newImages = req.files?.length
+            ? await uploadImages(req.files)
+            : [];
+
+        // 기존에 남겨둔 이미지 + 새 이미지
+        const images = [
+            ...currentImages,
+            ...newImages,
+        ];
+
+        const data = await updateContent({
+            detailId,
+            menuId,
+            title,
+            images,
+            content,
+        });
 
         return res.status(200).json({
             success: true,
