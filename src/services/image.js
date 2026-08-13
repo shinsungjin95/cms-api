@@ -4,7 +4,10 @@ export const uploadImages = async (files) => {
     const images = [];
 
     for (const file of files) {
-        const fileName = `${Date.now()}-${crypto.randomUUID()}-${file.originalname}`;
+        const extension = file.mimetype.split("/")[1] || "jpg";
+
+        const fileName =
+            `${Date.now()}-${crypto.randomUUID()}.${extension}`;
 
         const { error } = await supabase.storage
             .from("contents")
