@@ -19,7 +19,7 @@ export const login = async (req, res) => {
         console.log("DB USER:", user);
 
         if (!user) {
-            return res.status(401).json({
+            return res.status(400).json({
                 message: "아이디 또는 비밀번호가 올바르지 않습니다.",
             });
         }
@@ -30,7 +30,7 @@ export const login = async (req, res) => {
         );
 
         if (!passwordMatch) {
-            return res.status(401).json({
+            return res.status(400).json({
                 message: "아이디 또는 비밀번호가 올바르지 않습니다.",
             });
         }
