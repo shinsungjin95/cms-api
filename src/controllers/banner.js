@@ -5,6 +5,8 @@ import {
     updateBanner,
     deleteBanners,
     updateBannerOrders,
+    findBannerConfig,
+    updateBannerConfig,
 } from "../services/banner.js";
 
 import {
@@ -15,11 +17,17 @@ import {
 // 배너 전체 조회
 export const getBanners = async (req, res) => {
     try {
-        const data = await findBanners();
+        const [items, config] = await Promise.all([
+            findBanners(),
+            findBannerConfig(),
+        ]);
 
         return res.status(200).json({
             success: true,
-            data,
+            data: {
+                config,
+                items,
+            },
         });
 
     } catch (error) {
@@ -194,6 +202,97 @@ export const patchBannerOrders = async (req, res) => {
         }
 
         const data = await updateBannerOrders(orders);
+
+        return res.status(200).json({
+            success: true,
+            data,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+export const patchBannerConfig = async (req, res) => {
+    try {
+        const { config } = req.body;
+
+        if (!config) {
+            return res.status(400).json({
+                success: false,
+                message: "배너 설정 정보가 필요합니다.",
+            });
+        }
+
+        const effectList = [
+            "slide",
+            "fade",
+        ];
+
+        const paginationTypeList = [
+            "bullet",
+            "progress",
+            "fraction",
+        ];
+
+        const paginationPositionList = [
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
+        ];
+
+        const autoplayDelayList = [
+            1500,
+            2000,
+            2500,
+        ];
+
+        if (!effectList.includes(config.effect)) {
+            return res.status(400).json({
+                success: false,
+                message: "올바르지 않은 배너 효과입니다.",
+            });
+        }
+
+        if (
+            typeof config.navigation?.active !== "boolean"
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "navigation 설정이 올바르지 않습니다.",
+            });
+        }
+
+        if (
+            typeof config.pagination?.active !== "boolean" ||
+            !paginationTypeList.includes(
+                config.pagination?.type
+            ) ||
+            !paginationPositionList.includes(
+                config.pagination?.position
+            )
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "pagination 설정이 올바르지 않습니다.",
+            });
+        }
+
+        if (
+            typeof config.autoplay?.active !== "boolean" ||
+            !autoplayDelayList.includes(
+                config.autoplay?.delay
+            )
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "autoplay 설정이 올바르지 않습니다.",
+            });
+        }
+
+        const data = await updateBannerConfig(config);
 
         return res.status(200).json({
             success: true,

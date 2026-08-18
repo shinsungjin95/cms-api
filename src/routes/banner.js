@@ -6,6 +6,7 @@ import {
     patchBanner,
     removeBanners,
     patchBannerOrders,
+    patchBannerConfig,
 } from "../controllers/banner.js";
 
 import { authMiddleware } from "../middleware/authMiddleware.js";
@@ -23,16 +24,22 @@ router.post(
 );
 
 router.patch(
+    "/",
+    authMiddleware,
+    upload.single("image"),
+    patchBanner
+);
+
+router.patch(
     "/order",
     authMiddleware,
     patchBannerOrders
 );
 
 router.patch(
-    "/",
+    "/config",
     authMiddleware,
-    upload.single("image"),
-    patchBanner
+    patchBannerConfig
 );
 
 router.delete(

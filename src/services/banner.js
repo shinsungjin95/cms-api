@@ -143,3 +143,38 @@ export const updateBannerOrders = async (orders) => {
 
     return orders;
 };
+
+// 배너 Config 조회
+export const findBannerConfig = async () => {
+    const { data, error } = await supabase
+        .from("banner_config")
+        .select("config")
+        .eq("id", 1)
+        .maybeSingle();
+
+    if (error) {
+        throw error;
+    }
+
+    return data?.config ?? null;
+};
+
+
+// 배너 Config 수정
+export const updateBannerConfig = async (config) => {
+    const { data, error } = await supabase
+        .from("banner_config")
+        .update({
+            config,
+            updated_at: new Date().toISOString(),
+        })
+        .eq("id", 1)
+        .select("config")
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data.config;
+};
