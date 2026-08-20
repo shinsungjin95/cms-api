@@ -19,14 +19,32 @@ router.get("/", getBanners);
 router.post(
     "/",
     authMiddleware,
-    upload.single("image"),
+    upload.fields([
+        {
+            name: "pcImage",
+            maxCount: 1,
+        },
+        {
+            name: "moImage",
+            maxCount: 1,
+        },
+    ]),
     postBanner
 );
 
 router.patch(
     "/",
     authMiddleware,
-    upload.single("image"),
+    upload.fields([
+        {
+            name: "pcImage",
+            maxCount: 1,
+        },
+        {
+            name: "moImage",
+            maxCount: 1,
+        },
+    ]),
     patchBanner
 );
 

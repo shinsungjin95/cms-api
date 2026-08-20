@@ -178,3 +178,19 @@ export const updateBannerConfig = async (config) => {
 
     return data.config;
 };
+
+
+// 배너 단건 조회
+export const findBannerById = async (id) => {
+    const { data, error } = await supabase
+        .from("banners")
+        .select("id, image")
+        .eq("id", id)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+};

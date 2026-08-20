@@ -1,5 +1,6 @@
 import {
     findBanners,
+    findBannerById,
     getBannerCount,
     createBanner,
     updateBanner,
@@ -55,10 +56,13 @@ export const postBanner = async (req, res) => {
             });
         }
 
-        if (!req.file) {
+        const pcFile = req.files?.pcImage?.[0];
+        const moFile = req.files?.moImage?.[0];
+
+        if (!pcFile || !moFile) {
             return res.status(400).json({
                 success: false,
-                message: "배너 이미지가 필요합니다.",
+                message: "PC 이미지와 모바일 이미지를 모두 등록해 주세요.",
             });
         }
 
@@ -72,8 +76,14 @@ export const postBanner = async (req, res) => {
             });
         }
 
-        // Storage 이미지 업로드
-        const image = await uploadBannerImage(req.file);
+        // PC / 모바일 이미지 Storage 업로드
+        const pcImage = await uploadBannerImage(pcFile);
+        const moImage = await uploadBannerImage(moFile);
+
+        const image = {
+            pc: pcImage,
+            mo: moImage,
+        };
 
         const data = await createBanner({
             title,
@@ -95,7 +105,6 @@ export const postBanner = async (req, res) => {
     }
 };
 
-
 export const patchBanner = async (req, res) => {
     try {
         const {
@@ -103,7 +112,6 @@ export const patchBanner = async (req, res) => {
             title,
             link,
             active,
-            sortOrder,
         } = req.body;
 
         if (!id) {
@@ -113,11 +121,24 @@ export const patchBanner = async (req, res) => {
             });
         }
 
-        let image;
+        const currentBanner = await findBannerById(id);
 
-        // 새 이미지를 선택했을 때만 Storage 업로드
-        if (req.file) {
-            image = await uploadBannerImage(req.file);
+        const pcFile = req.files?.pcImage?.[0];
+        const moFile = req.files?.moImage?.[0];
+
+        let image = currentBanner.image;
+
+        // PC 또는 MO 이미지가 새로 들어온 경우
+        if (pcFile || moFile) {
+            image = {
+                pc: pcFile
+                    ? await uploadBannerImage(pcFile)
+                    : currentBanner.image?.pc,
+
+                mo: moFile
+                    ? await uploadBannerImage(moFile)
+                    : currentBanner.image?.mo,
+            };
         }
 
         const data = await updateBanner({
@@ -125,16 +146,10 @@ export const patchBanner = async (req, res) => {
             title,
             link,
             image,
-
-            // form-data에서는 boolean이 문자열로 들어옴
             active:
                 active !== undefined
                     ? active === "true"
                     : undefined,
-                        sortOrder:
-            sortOrder !== undefined
-                ? Number(sortOrder)
-                : undefined,
         });
 
         return res.status(200).json({
