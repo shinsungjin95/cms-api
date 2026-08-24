@@ -1,5 +1,4 @@
 import supabase from "../config/supabase.js";
-
 export const findContents = async ({
     menuId,
     offset,
@@ -8,8 +7,8 @@ export const findContents = async ({
     startDate,
     endDate,
 }) => {
-    const from = offset;
-    const to = offset + limit - 1;
+    const from = offset * limit;
+    const to = from + limit - 1;
 
     let query = supabase
         .from("contents")
