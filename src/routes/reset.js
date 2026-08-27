@@ -3,6 +3,6 @@ import { resetCms } from "../controllers/reset.js";
 
 const router = express.Router();
 
-router.post("/", resetCms);
+router.get("/", resetCms);
 
 export default router;
