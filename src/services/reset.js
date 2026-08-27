@@ -1,7 +1,7 @@
 import supabase from "../config/supabase.js";
 
 /**
- * 백업 데이터를 기준으로 CMS 데이터 복구
+ * 백업 테이블 데이터를 기준으로 CMS 데이터 복구
  */
 export const resetCmsData = async () => {
     const tables = [
@@ -14,6 +14,8 @@ export const resetCmsData = async () => {
     for (const table of tables) {
         const backupTable = `${table}_backup`;
 
+        console.log(`[RESET] ${table} 시작`);
+
         // 백업 데이터 조회
         const {
             data: backupData,
@@ -23,8 +25,14 @@ export const resetCmsData = async () => {
             .select("*");
 
         if (backupError) {
+            console.error(`[RESET] ${backupTable} 조회 실패`, backupError);
             throw backupError;
         }
+
+        console.log(
+            `[RESET] ${backupTable} 백업 데이터:`,
+            backupData?.length ?? 0
+        );
 
         // 현재 데이터 전체 삭제
         const {
@@ -35,8 +43,11 @@ export const resetCmsData = async () => {
             .not("id", "is", null);
 
         if (deleteError) {
+            console.error(`[RESET] ${table} 삭제 실패`, deleteError);
             throw deleteError;
         }
+
+        console.log(`[RESET] ${table} 삭제 완료`);
 
         // 백업 데이터 복구
         if (backupData?.length) {
@@ -47,10 +58,15 @@ export const resetCmsData = async () => {
                 .insert(backupData);
 
             if (insertError) {
+                console.error(`[RESET] ${table} 복구 실패`, insertError);
                 throw insertError;
             }
+
+            console.log(`[RESET] ${table} 복구 완료`);
         }
     }
+
+    console.log("[RESET] 전체 복구 완료");
 
     return {
         success: true,
